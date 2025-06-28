@@ -1,5 +1,7 @@
 resource "aws_vpc" "vpc" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block           = "10.0.0.0/16"
+  enable_dns_support   = true
+  enable_dns_hostnames = true
 
   tags = {
     Name = var.vpc-name
@@ -17,25 +19,28 @@ resource "aws_internet_gateway" "igw" {
 resource "aws_subnet" "public-subnet1" {
   vpc_id                  = aws_vpc.vpc.id
   cidr_block              = "10.0.1.0/24"
-  availability_zone       = "us-west-2"
+  availability_zone       = "us-west-2a"
   map_public_ip_on_launch = true
 
   tags = {
     Name = var.subnet-name1
   }
 }
+
 resource "aws_subnet" "public-subnet2" {
   vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = "10.0.0.0/24"
-  availability_zone       = "us-east-1b"
+  cidr_block              = "10.0.2.0/24"  # Fixed to avoid overlap
+  availability_zone       = "us-west-2b"
   map_public_ip_on_launch = true
 
   tags = {
     Name = var.subnet-name2
   }
 }
+
 resource "aws_route_table" "rt" {
   vpc_id = aws_vpc.vpc.id
+
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
@@ -46,10 +51,11 @@ resource "aws_route_table" "rt" {
   }
 }
 
-resource "aws_route_table_association" "rt-association" {
+resource "aws_route_table_association" "rt-association1" {
   route_table_id = aws_route_table.rt.id
   subnet_id      = aws_subnet.public-subnet1.id
 }
+
 resource "aws_route_table_association" "rt-association2" {
   route_table_id = aws_route_table.rt.id
   subnet_id      = aws_subnet.public-subnet2.id
