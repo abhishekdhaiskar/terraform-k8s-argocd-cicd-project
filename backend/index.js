@@ -12,11 +12,11 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan('common'));
 const db = mysql.createConnection({
-  host: process.env.DB_HOST ,
+  host: process.env.DB_HOST,
   user: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   port: process.env.PORT,
-  database: "test",
+  database: process.env.DB_NAME,   // <-- Fetch from environment
 });
 
 app.get("/", (req, res) => {
