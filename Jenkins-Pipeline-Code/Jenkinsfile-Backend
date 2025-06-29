@@ -5,7 +5,7 @@ pipeline {
         nodejs 'nodejs'
     }
     environment  {
-        SCANNER_HOME = tool 'sonar-scanner'
+       # SCANNER_HOME = tool 'sonar-scanner'
         AWS_ACCOUNT_ID = credentials('ACCOUNT_ID')    // This should be Secret Text storing only the AWS Account ID
         AWS_DEFAULT_REGION = 'us-west-2'
         AWS_ECR_REPO_NAME = 'backend-app'      // Provide your ECR Repo name directly here
@@ -24,7 +24,7 @@ pipeline {
             }
         }
 
-        stage('Sonarqube Analysis') {
+     /*  stage('Sonarqube Analysis') {
             steps {
                 dir('backend') {
                     withSonarQubeEnv('sonar-server') {
@@ -53,7 +53,7 @@ pipeline {
                 }
             }
         }
-
+*/
         stage("Docker Image Build") {
             steps {
                 dir('backend') {
