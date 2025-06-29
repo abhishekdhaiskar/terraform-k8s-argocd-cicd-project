@@ -5,13 +5,15 @@ pipeline {
         nodejs 'nodejs'
     }
     environment  {
-       // SCANNER_HOME = tool 'sonar-scanner'
-        AWS_ACCOUNT_ID = credentials('ACCOUNT_ID')    // This should be Secret Text storing only the AWS Account ID
+        // SCANNER_HOME = tool 'sonar-scanner'   // SonarScanner tool (commented out for now)
+        AWS_ACCOUNT_ID = credentials('ACCOUNT_ID')    // Secret Text with only AWS Account ID
         AWS_DEFAULT_REGION = 'us-west-2'
-        AWS_ECR_REPO_NAME = 'backend-app'      // Provide your ECR Repo name directly here
+        AWS_ECR_REPO_NAME = 'backend-app'             
         REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
     }
+    
     stages {
+        
         stage('Cleaning Workspace') {
             steps {
                 cleanWs()
@@ -24,7 +26,8 @@ pipeline {
             }
         }
 
-     /*  stage('Sonarqube Analysis') {
+        /*
+        stage('Sonarqube Analysis') {
             steps {
                 dir('backend') {
                     withSonarQubeEnv('sonar-server') {
@@ -45,7 +48,8 @@ pipeline {
                 }
             }
         }
-*/
+        */
+
         stage('Trivy File Scan') {
             steps {
                 dir('backend') {
@@ -54,7 +58,7 @@ pipeline {
             }
         }
 
-        stage("Docker Image Build") {
+        stage('Docker Image Build') {
             steps {
                 dir('backend') {
                     sh '''
@@ -66,7 +70,7 @@ pipeline {
             }
         }
 
-        stage("ECR Image Pushing") {
+        stage('ECR Image Pushing') {
             steps {
                 sh '''
                     aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${REPOSITORY_URI}
@@ -76,9 +80,9 @@ pipeline {
             }
         }
 
-        stage("TRIVY Image Scan") {
+        stage('TRIVY Image Scan') {
             steps {
-                sh 'trivy image ${REPOSITORY_URI}/${AWS_ECR_REPO_NAME}:${BUILD_NUMBER} > trivyimage.txt' 
+                sh 'trivy image ${REPOSITORY_URI}/${AWS_ECR_REPO_NAME}:${BUILD_NUMBER} > trivyimage.txt'
             }
         }
 
@@ -89,14 +93,20 @@ pipeline {
             }
             steps {
                 dir('kubernetes-files') {
-                    withCredentials([string(credentialsId: 'github', variable: 'git_token')]) {
+                    withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
                         sh '''
                             git config user.email "abhishekdhiskar2003@gmail.com"
                             git config user.name "abhishekdhaiskar"
+
+                            git clone https://$GIT_USER:$GIT_TOKEN@github.com/abhishekdhaiskar/terraform-k8s-argocd-cicd-project.git
+
+                            cd terraform-k8s-argocd-cicd-project/kubernetes-files
+
                             sed -i "s#image:.*#image: ${REPOSITORY_URI}/${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}#g" backend-deployment.yaml
+
                             git add .
                             git commit -m "Update deployment Image to version ${BUILD_NUMBER}"
-                            git push https://${git_token}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+                            git push https://$GIT_USER:$GIT_TOKEN@github.com/abhishekdhaiskar/terraform-k8s-argocd-cicd-project.git HEAD:main
                         '''
                     }
                 }
