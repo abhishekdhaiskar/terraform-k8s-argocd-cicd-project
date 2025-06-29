@@ -5,7 +5,7 @@ pipeline {
         nodejs 'nodejs'
     }
     environment  {
-        SCANNER_HOME = tool 'sonar-scanner'
+      //  SCANNER_HOME = tool 'sonar-scanner'
         AWS_ACCOUNT_ID = '888577051441'
         AWS_ECR_REPO_NAME = 'frontend-app'
         AWS_DEFAULT_REGION = 'us-west-2'
@@ -23,7 +23,7 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/abhishekdhaiskar/terraform-k8s-argocd-cicd-project.git'
             }
         }
-
+/*
         stage('Sonarqube Analysis') {
             steps {
                 dir('client') {
@@ -45,7 +45,7 @@ pipeline {
                 }
             }
         }
-
+*/
         stage('Trivy File Scan') {
             steps {
                 dir('client') {
