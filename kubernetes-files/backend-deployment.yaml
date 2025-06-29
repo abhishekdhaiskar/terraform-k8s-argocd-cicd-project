@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: 888577051441.dkr.ecr.us-west-2.amazonaws.com/backend-app # replace your ECR image
+        image: 888577051441.dkr.ecr.us-west-2.amazonaws.com/backend-app:12
         ports:
         - containerPort: 80
         env:
