@@ -30,20 +30,12 @@ spec:
             secretKeyRef:
               name: db-secret
               key: db_username
-        - name: DB_PORT
-          valueFrom:
-            configMapKeyRef:
-              name: db-config
-              key: DB_PORT
-        - name: DB_NAME
-          valueFrom:
-            configMapKeyRef:
-              name: db-config
-              key: DB_NAME
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: db-secret
               key: db_password
-        - name: PORT
-          value: "3306"  # Adjust if necessary
+        - name: DB_NAME
+          value: "bookdb"  # Replace with your actual DB name
+        - name: DB_PORT
+          value: "3306"
